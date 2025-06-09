@@ -23,6 +23,8 @@ import {
   Calendar,
   Database,
   Clock,
+  MapPin,
+  Phone,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
@@ -586,14 +588,120 @@ const Index = () => {
             </TabsContent>
           </Tabs>
         </div>
-
-        {/* Footer */}
-        <div className="text-center mt-12 pt-8 border-t border-slate-700">
-          <p className="text-slate-400">
-            SecYourScan - Protecting your digital footprint 24/7
-          </p>
-        </div>
       </div>
+      {/* Footer */}
+      <footer
+        id="contact"
+        className="bg-slate-800/50 border-t border-slate-700"
+      >
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <img
+                  src="https://avatars.githubusercontent.com/u/180004145?s=200&v=4"
+                  alt="SecYourScan Logo"
+                  className="h-8 w-8 rounded-lg"
+                />
+                <h4 className="text-xl font-bold text-white">SecYourScan</h4>
+              </div>
+              <p className="text-slate-400">
+                Secyourscan helps you stay vigilant and protect your personal
+                information from data breaches. We provide tools to check if
+                your email address has been compromised.
+              </p>
+            </div>
+
+            <div>
+              <h5 className="text-white font-semibold mb-4">Useful Links</h5>
+              <div className="space-y-2">
+                <a
+                  href="/"
+                  className="block text-slate-400 hover:text-purple-400 transition-colors"
+                >
+                  Home
+                </a>
+                <a
+                  href="#"
+                  className="block text-slate-400 hover:text-purple-400 transition-colors"
+                >
+                  Breaches Visualization
+                </a>
+                <a
+                  href="#"
+                  className="block text-slate-400 hover:text-purple-400 transition-colors"
+                >
+                  Data Breaches Timeline
+                </a>
+                <a
+                  href="#"
+                  className="block text-slate-400 hover:text-purple-400 transition-colors"
+                >
+                  Exposed Data Breaches
+                </a>
+                <a
+                  href="#"
+                  className="block text-slate-400 hover:text-purple-400 transition-colors"
+                >
+                  Password-Pwned ?
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <h5 className="text-white font-semibold mb-4">Our Services</h5>
+              <div className="space-y-2">
+                <a
+                  href="#"
+                  className="block text-slate-400 hover:text-purple-400 transition-colors"
+                >
+                  Secyourall SIEM
+                </a>
+                <a
+                  href="#"
+                  className="block text-slate-400 hover:text-purple-400 transition-colors"
+                >
+                  Secyourflow SOAR
+                </a>
+                <a
+                  href="#"
+                  className="block text-slate-400 hover:text-purple-400 transition-colors"
+                >
+                  Secyourscan
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <h5 className="text-white font-semibold mb-4">Contact Us</h5>
+              <div className="space-y-3">
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 text-purple-400 mt-1 flex-shrink-0" />
+                  <div className="text-slate-400">
+                    <div>Sheyne Inc</div>
+                    <div>Bhaktithapa, Baneshwor</div>
+                    <div>Nepal</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-purple-400" />
+                  <span className="text-slate-400">+977 9828137850</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-purple-400" />
+                  <span className="text-slate-400">info@shyena.com</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-700 mt-8 pt-8 text-center">
+            <p className="text-slate-400">
+              © 2025 Shyena Inc. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
