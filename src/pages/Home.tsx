@@ -19,10 +19,17 @@ import {
   Mail,
   Phone,
   MapPin,
+  TrendingUp,
+  AlertTriangle,
+  Database,
+  Key,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useMetrics } from "@/hooks/useMetrics";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Home = () => {
+  const { data: metrics, isLoading, error } = useMetrics();
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Navigation */}
@@ -103,25 +110,117 @@ const Home = () => {
 
       {/* Stats Section */}
       <section className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          <Card className="bg-slate-800/50 border-slate-700 text-center">
-            <CardContent className="pt-6">
-              <div className="text-4xl font-bold text-purple-400 mb-2">624</div>
-              <div className="text-slate-300">Data Breaches</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-800/50 border-slate-700 text-center">
-            <CardContent className="pt-6">
-              <div className="text-4xl font-bold text-red-400 mb-2">10.4B</div>
-              <div className="text-slate-300">Exposed Records</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-800/50 border-slate-700 text-center">
-            <CardContent className="pt-6">
-              <div className="text-4xl font-bold text-blue-400 mb-2">4.7B</div>
-              <div className="text-slate-300">Exposed Emails</div>
-            </CardContent>
-          </Card>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-white mb-4">
+              Global Threat Landscape
+            </h3>
+            <p className="text-slate-300 text-lg">
+              Real-time statistics from our comprehensive breach monitoring
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-all duration-300 group">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-purple-600/20 rounded-lg group-hover:bg-purple-600/30 transition-colors">
+                    <Database className="h-8 w-8 text-purple-400" />
+                  </div>
+                  <TrendingUp className="h-5 w-5 text-purple-400" />
+                </div>
+                {isLoading ? (
+                  <Skeleton className="h-12 w-24 mb-2 bg-slate-700" />
+                ) : error ? (
+                  <div className="text-red-400 text-xl font-bold">Error</div>
+                ) : (
+                  <div className="text-4xl font-bold text-purple-400 mb-2">
+                    {metrics?.breaches || "624"}
+                  </div>
+                )}
+                <div className="text-slate-300 font-medium">Data Breaches</div>
+                <div className="text-sm text-slate-400 mt-1">
+                  Monitored incidents
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-all duration-300 group">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-red-600/20 rounded-lg group-hover:bg-red-600/30 transition-colors">
+                    <AlertTriangle className="h-8 w-8 text-red-400" />
+                  </div>
+                  <TrendingUp className="h-5 w-5 text-red-400" />
+                </div>
+                {isLoading ? (
+                  <Skeleton className="h-12 w-24 mb-2 bg-slate-700" />
+                ) : error ? (
+                  <div className="text-red-400 text-xl font-bold">Error</div>
+                ) : (
+                  <div className="text-4xl font-bold text-red-400 mb-2">
+                    {metrics?.exposedRecords || "10.4B"}
+                  </div>
+                )}
+                <div className="text-slate-300 font-medium">
+                  Exposed Records
+                </div>
+                <div className="text-sm text-slate-400 mt-1">
+                  Compromised data points
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-all duration-300 group">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-blue-600/20 rounded-lg group-hover:bg-blue-600/30 transition-colors">
+                    <Mail className="h-8 w-8 text-blue-400" />
+                  </div>
+                  <TrendingUp className="h-5 w-5 text-blue-400" />
+                </div>
+                {isLoading ? (
+                  <Skeleton className="h-12 w-24 mb-2 bg-slate-700" />
+                ) : error ? (
+                  <div className="text-red-400 text-xl font-bold">Error</div>
+                ) : (
+                  <div className="text-4xl font-bold text-blue-400 mb-2">
+                    {metrics?.exposedEmails || "4.7B"}
+                  </div>
+                )}
+                <div className="text-slate-300 font-medium">Exposed Emails</div>
+                <div className="text-sm text-slate-400 mt-1">
+                  Breached email addresses
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-all duration-300 group">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-orange-600/20 rounded-lg group-hover:bg-orange-600/30 transition-colors">
+                    <Key className="h-8 w-8 text-orange-400" />
+                  </div>
+                  <TrendingUp className="h-5 w-5 text-orange-400" />
+                </div>
+                {isLoading ? (
+                  <Skeleton className="h-12 w-24 mb-2 bg-slate-700" />
+                ) : error ? (
+                  <div className="text-red-400 text-xl font-bold">Error</div>
+                ) : (
+                  <div className="text-4xl font-bold text-orange-400 mb-2">
+                    {metrics?.exposedPasswords || "836.0M"}
+                  </div>
+                )}
+                <div className="text-slate-300 font-medium">
+                  Exposed Passwords
+                </div>
+                <div className="text-sm text-slate-400 mt-1">
+                  Compromised credentials
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 
