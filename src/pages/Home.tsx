@@ -536,7 +536,7 @@ const Home = () => {
                   Data Breaches Timeline
                 </a>
                 <a
-                  href="#"
+                  href="/exposed-breach"
                   className="block text-slate-400 hover:text-purple-400 transition-colors"
                 >
                   Exposed Data Breaches
