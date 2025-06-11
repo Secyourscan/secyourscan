@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ExposedBreach from "./pages/ExposedBreach";
+import BreachRisk from "./pages/BreachRisk";
 
 const queryClient = new QueryClient();
 
@@ -18,8 +19,9 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<Index />} />
+          <Route path="/scan" element={<Index />} />
           <Route path="/exposed-breach" element={<ExposedBreach />} />
+          <Route path="/breach-risk" element={<BreachRisk />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
