@@ -2,9 +2,9 @@ import { useState } from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +35,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("email");
   const navigate = useNavigate();
 
-  // Email breach check query (only basic check now)
+  // Email breach check query
   const {
     data: emailBreachData,
     isLoading: emailLoading,
@@ -49,6 +49,10 @@ const Index = () => {
       );
 
       if (!response.ok) {
+        if (response.status === 404) {
+          // 404 means no breaches found
+          return { details: "not found" };
+        }
         if (response.status === 429) {
           const errorData = await response.json();
           throw new Error(
@@ -127,7 +131,6 @@ const Index = () => {
       return;
     }
 
-    // Basic domain validation
     const domainRegex =
       /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$/;
     if (!domainRegex.test(domain)) {
@@ -285,19 +288,45 @@ const Index = () => {
                     <Card className="bg-slate-700/50 border-slate-600">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-white">
-                          {emailBreachData.breaches &&
-                          parseBreachList(emailBreachData.breaches).length >
-                            0 ? (
-                            <XCircle className="h-5 w-5 text-red-400" />
-                          ) : (
+                          {emailBreachData.details === "not found" ||
+                          (emailBreachData.breaches &&
+                            parseBreachList(emailBreachData.breaches).length ===
+                              0) ? (
                             <CheckCircle className="h-5 w-5 text-green-400" />
+                          ) : (
+                            <XCircle className="h-5 w-5 text-red-400" />
                           )}
                           Breach Status
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        {emailBreachData.breaches &&
-                        parseBreachList(emailBreachData.breaches).length > 0 ? (
+                        {emailBreachData.details === "not found" ||
+                        (emailBreachData.breaches &&
+                          parseBreachList(emailBreachData.breaches).length ===
+                            0) ? (
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant="outline"
+                                className="border-green-500 text-green-400"
+                              >
+                                SECURE
+                              </Badge>
+                              <span className="text-slate-300">
+                                No breaches found
+                              </span>
+                            </div>
+                            <div className="pt-4 border-t border-slate-600">
+                              <Button
+                                onClick={handleDetailedReport}
+                                className="bg-blue-600 hover:bg-blue-700 w-full"
+                              >
+                                <FileText className="h-4 w-4 mr-2" />
+                                View Detailed Report
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
                           <div className="space-y-4">
                             <div className="flex items-center gap-2">
                               <Badge variant="destructive">COMPROMISED</Badge>
@@ -322,29 +351,6 @@ const Index = () => {
                                   </div>
                                 )
                               )}
-                            </div>
-                            <div className="pt-4 border-t border-slate-600">
-                              <Button
-                                onClick={handleDetailedReport}
-                                className="bg-blue-600 hover:bg-blue-700 w-full"
-                              >
-                                <FileText className="h-4 w-4 mr-2" />
-                                View Detailed Report
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="space-y-4">
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className="border-green-500 text-green-400"
-                              >
-                                SECURE
-                              </Badge>
-                              <span className="text-slate-300">
-                                No breaches found
-                              </span>
                             </div>
                             <div className="pt-4 border-t border-slate-600">
                               <Button
