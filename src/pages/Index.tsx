@@ -23,18 +23,19 @@ import {
   Calendar,
   Database,
   Clock,
-  MapPin,
-  Phone,
+  FileText,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [email, setEmail] = useState("");
   const [domain, setDomain] = useState("");
   const [activeTab, setActiveTab] = useState("email");
+  const navigate = useNavigate();
 
-  // Email breach check query
+  // Email breach check query (only basic check now)
   const {
     data: emailBreachData,
     isLoading: emailLoading,
@@ -66,38 +67,6 @@ const Index = () => {
     enabled: false,
   });
 
-  // Email analytics query
-  const {
-    data: analyticsData,
-    isLoading: analyticsLoading,
-    error: analyticsError,
-    refetch: refetchAnalytics,
-  } = useQuery({
-    queryKey: ["email-analytics", email],
-    queryFn: async () => {
-      const response = await fetch(
-        `https://secyourscan.aryan4.com.np/v1/breach-analytics?email=${email}`
-      );
-
-      if (!response.ok) {
-        if (response.status === 429) {
-          const errorData = await response.json();
-          throw new Error(
-            `Rate limit exceeded. Please try again in ${Math.ceil(
-              errorData.retry_after / 60
-            )} minutes.`
-          );
-        }
-        throw new Error("Failed to fetch analytics");
-      }
-
-      const data = await response.json();
-      console.log("Analytics data:", data);
-      return data;
-    },
-    enabled: false,
-  });
-
   // Domain breach query
   const {
     data: domainBreachData,
@@ -108,7 +77,7 @@ const Index = () => {
     queryKey: ["domain-breach", domain],
     queryFn: async () => {
       const response = await fetch(
-        `https://secyourscan.aryan4.com.np/v1/domain-breaches-summary?domain=${domain}`
+        `https://secyourscan.aryan4.com.np/v1/proxy-breaches-by-domain/?domain=${domain}`
       );
 
       if (!response.ok) {
@@ -146,7 +115,6 @@ const Index = () => {
       return;
     }
     refetchEmail();
-    refetchAnalytics();
   };
 
   const handleDomainCheck = () => {
@@ -172,6 +140,10 @@ const Index = () => {
     }
 
     refetchDomain();
+  };
+
+  const handleDetailedReport = () => {
+    navigate(`/breach-risk?email=${encodeURIComponent(email)}`);
   };
 
   const formatDate = (dateString: string) => {
@@ -204,14 +176,6 @@ const Index = () => {
       return breaches[0]; // Nested array format
     }
     return breaches;
-  };
-
-  const getBreachDetails = (breachName: string, analyticsData: any) => {
-    if (!analyticsData?.ExposedBreaches?.breaches_details) return null;
-
-    return analyticsData.ExposedBreaches.breaches_details.find(
-      (breach: any) => breach.breach.toLowerCase() === breachName.toLowerCase()
-    );
   };
 
   const getRateLimitMessage = (error: any) => {
@@ -302,10 +266,10 @@ const Index = () => {
                     />
                     <Button
                       onClick={handleEmailCheck}
-                      disabled={emailLoading || analyticsLoading}
+                      disabled={emailLoading}
                       className="bg-purple-600 hover:bg-purple-700"
                     >
-                      {emailLoading || analyticsLoading ? (
+                      {emailLoading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <Eye className="h-4 w-4" />
@@ -314,8 +278,7 @@ const Index = () => {
                     </Button>
                   </div>
 
-                  {(emailError || analyticsError) &&
-                    getRateLimitMessage(emailError || analyticsError)}
+                  {emailError && getRateLimitMessage(emailError)}
 
                   {/* Email Breach Results */}
                   {emailBreachData && (
@@ -348,116 +311,52 @@ const Index = () => {
                             </div>
                             <div className="grid gap-3">
                               {parseBreachList(emailBreachData.breaches).map(
-                                (breachName: string, index: number) => {
-                                  const breachDetails = getBreachDetails(
-                                    breachName,
-                                    analyticsData
-                                  );
-                                  return (
-                                    <div
-                                      key={index}
-                                      className="bg-slate-800 p-4 rounded-lg border border-slate-600"
-                                    >
-                                      <div className="flex justify-between items-start mb-2">
-                                        <h4 className="font-semibold text-white">
-                                          {breachName}
-                                        </h4>
-                                        {breachDetails?.password_risk && (
-                                          <Badge
-                                            variant={getBadgeVariant(
-                                              breachDetails.password_risk
-                                            )}
-                                          >
-                                            {breachDetails.password_risk}
-                                          </Badge>
-                                        )}
-                                      </div>
-                                      {breachDetails?.details && (
-                                        <p className="text-slate-400 text-sm mb-2">
-                                          {breachDetails.details}
-                                        </p>
-                                      )}
-                                      <div className="flex items-center gap-4 text-sm">
-                                        {breachDetails?.xposed_date && (
-                                          <span className="flex items-center gap-1 text-slate-300">
-                                            <Calendar className="h-3 w-3" />
-                                            {breachDetails.xposed_date}
-                                          </span>
-                                        )}
-                                        {breachDetails?.xposed_records && (
-                                          <span className="flex items-center gap-1 text-slate-300">
-                                            <Database className="h-3 w-3" />
-                                            {breachDetails.xposed_records.toLocaleString()}{" "}
-                                            records
-                                          </span>
-                                        )}
-                                      </div>
-                                      {breachDetails?.xposed_data && (
-                                        <div className="mt-2">
-                                          <span className="text-xs text-slate-400">
-                                            Exposed data:{" "}
-                                            {breachDetails.xposed_data}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                }
+                                (breachName: string, index: number) => (
+                                  <div
+                                    key={index}
+                                    className="bg-slate-800 p-4 rounded-lg border border-slate-600"
+                                  >
+                                    <h4 className="font-semibold text-white">
+                                      {breachName}
+                                    </h4>
+                                  </div>
+                                )
                               )}
+                            </div>
+                            <div className="pt-4 border-t border-slate-600">
+                              <Button
+                                onClick={handleDetailedReport}
+                                className="bg-blue-600 hover:bg-blue-700 w-full"
+                              >
+                                <FileText className="h-4 w-4 mr-2" />
+                                View Detailed Report
+                              </Button>
                             </div>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2">
-                            <Badge
-                              variant="outline"
-                              className="border-green-500 text-green-400"
-                            >
-                              SECURE
-                            </Badge>
-                            <span className="text-slate-300">
-                              No breaches found
-                            </span>
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant="outline"
+                                className="border-green-500 text-green-400"
+                              >
+                                SECURE
+                              </Badge>
+                              <span className="text-slate-300">
+                                No breaches found
+                              </span>
+                            </div>
+                            <div className="pt-4 border-t border-slate-600">
+                              <Button
+                                onClick={handleDetailedReport}
+                                className="bg-blue-600 hover:bg-blue-700 w-full"
+                              >
+                                <FileText className="h-4 w-4 mr-2" />
+                                View Detailed Report
+                              </Button>
+                            </div>
                           </div>
                         )}
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Analytics Results */}
-                  {analyticsData?.BreachMetrics && (
-                    <Card className="bg-slate-700/50 border-slate-600">
-                      <CardHeader>
-                        <CardTitle className="text-white">
-                          Detailed Analytics
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="bg-slate-800 p-4 rounded-lg">
-                            <div className="text-2xl font-bold text-purple-400">
-                              {parseBreachList(emailBreachData?.breaches)
-                                ?.length || 0}
-                            </div>
-                            <div className="text-slate-400">Total Breaches</div>
-                          </div>
-                          <div className="bg-slate-800 p-4 rounded-lg">
-                            <div className="text-2xl font-bold text-red-400">
-                              {analyticsData.BreachMetrics.risk?.[0]
-                                ?.risk_score || 0}
-                              %
-                            </div>
-                            <div className="text-slate-400">Risk Score</div>
-                          </div>
-                          <div className="bg-slate-800 p-4 rounded-lg">
-                            <div className="text-2xl font-bold text-blue-400">
-                              {analyticsData.BreachMetrics
-                                .passwords_strength?.[0]?.PlainText || 0}
-                            </div>
-                            <div className="text-slate-400">
-                              Plain Text Passwords
-                            </div>
-                          </div>
-                        </div>
                       </CardContent>
                     </Card>
                   )}
@@ -511,9 +410,8 @@ const Index = () => {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        {domainBreachData.sendDomains?.breaches_details &&
-                        domainBreachData.sendDomains.breaches_details.length >
-                          0 ? (
+                        {domainBreachData.breaches &&
+                        domainBreachData.breaches.length > 0 ? (
                           <div className="space-y-4">
                             <div className="flex items-center gap-2 mb-4">
                               <XCircle className="h-5 w-5 text-red-400" />
@@ -521,15 +419,12 @@ const Index = () => {
                                 BREACHES DETECTED
                               </Badge>
                               <span className="text-slate-300">
-                                {
-                                  domainBreachData.sendDomains.breaches_details
-                                    .length
-                                }{" "}
-                                incident(s) found
+                                {domainBreachData.breaches.length} incident(s)
+                                found
                               </span>
                             </div>
                             <div className="grid gap-3">
-                              {domainBreachData.sendDomains.breaches_details.map(
+                              {domainBreachData.breaches.map(
                                 (breach: any, index: number) => (
                                   <div
                                     key={index}
@@ -537,29 +432,33 @@ const Index = () => {
                                   >
                                     <div className="flex justify-between items-start mb-2">
                                       <h4 className="font-semibold text-white">
-                                        {breach.domain || "Unknown Domain"}
+                                        {breach.name || "Domain Breach"}
                                       </h4>
                                       <Badge
-                                        variant={getBadgeVariant("Medium")}
+                                        variant={getBadgeVariant(
+                                          breach.severity
+                                        )}
                                       >
-                                        Medium
+                                        {breach.severity || "Medium"}
                                       </Badge>
                                     </div>
                                     <p className="text-slate-400 text-sm mb-2">
-                                      {breach.breach_count} breach incident(s),
-                                      total of {breach.breach_total} records
-                                      affected.
+                                      {breach.description}
                                     </p>
                                     <div className="flex items-center gap-4 text-sm">
                                       <span className="flex items-center gap-1 text-slate-300">
                                         <Calendar className="h-3 w-3" />
-                                        {breach.breach_last_seen ||
-                                          "Date unknown"}
+                                        {breach.date
+                                          ? formatDate(breach.date)
+                                          : "Date unknown"}
                                       </span>
-                                      <span className="flex items-center gap-1 text-slate-300">
-                                        <Database className="h-3 w-3" />
-                                        {breach.breach_emails} email(s) affected
-                                      </span>
+                                      {breach.affected_accounts && (
+                                        <span className="flex items-center gap-1 text-slate-300">
+                                          <Database className="h-3 w-3" />
+                                          {breach.affected_accounts} accounts
+                                          affected
+                                        </span>
+                                      )}
                                     </div>
                                   </div>
                                 )
@@ -588,120 +487,14 @@ const Index = () => {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
-      {/* Footer */}
-      <footer
-        id="contact"
-        className="bg-slate-800/50 border-t border-slate-700"
-      >
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <img
-                  src="https://avatars.githubusercontent.com/u/180004145?s=200&v=4"
-                  alt="SecYourScan Logo"
-                  className="h-8 w-8 rounded-lg"
-                />
-                <h4 className="text-xl font-bold text-white">SecYourScan</h4>
-              </div>
-              <p className="text-slate-400">
-                Secyourscan helps you stay vigilant and protect your personal
-                information from data breaches. We provide tools to check if
-                your email address has been compromised.
-              </p>
-            </div>
 
-            <div>
-              <h5 className="text-white font-semibold mb-4">Useful Links</h5>
-              <div className="space-y-2">
-                <a
-                  href="/"
-                  className="block text-slate-400 hover:text-purple-400 transition-colors"
-                >
-                  Home
-                </a>
-                <a
-                  href="#"
-                  className="block text-slate-400 hover:text-purple-400 transition-colors"
-                >
-                  Breaches Visualization
-                </a>
-                <a
-                  href="#"
-                  className="block text-slate-400 hover:text-purple-400 transition-colors"
-                >
-                  Data Breaches Timeline
-                </a>
-                <a
-                  href="#"
-                  className="block text-slate-400 hover:text-purple-400 transition-colors"
-                >
-                  Exposed Data Breaches
-                </a>
-                <a
-                  href="#"
-                  className="block text-slate-400 hover:text-purple-400 transition-colors"
-                >
-                  Password-Pwned ?
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <h5 className="text-white font-semibold mb-4">Our Services</h5>
-              <div className="space-y-2">
-                <a
-                  href="#"
-                  className="block text-slate-400 hover:text-purple-400 transition-colors"
-                >
-                  Secyourall SIEM
-                </a>
-                <a
-                  href="#"
-                  className="block text-slate-400 hover:text-purple-400 transition-colors"
-                >
-                  Secyourflow SOAR
-                </a>
-                <a
-                  href="#"
-                  className="block text-slate-400 hover:text-purple-400 transition-colors"
-                >
-                  Secyourscan
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <h5 className="text-white font-semibold mb-4">Contact Us</h5>
-              <div className="space-y-3">
-                <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-purple-400 mt-1 flex-shrink-0" />
-                  <div className="text-slate-400">
-                    <div>Sheyne Inc</div>
-                    <div>Bhaktithapa, Baneshwor</div>
-                    <div>Nepal</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-purple-400" />
-                  <span className="text-slate-400">+977 9828137850</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-purple-400" />
-                  <span className="text-slate-400">info@shyena.com</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-700 mt-8 pt-8 text-center">
-            <p className="text-slate-400">
-              © 2025 Shyena Inc. All rights reserved.
-            </p>
-          </div>
+        {/* Footer */}
+        <div className="text-center mt-12 pt-8 border-t border-slate-700">
+          <p className="text-slate-400">
+            SecYourScan - Protecting your digital footprint 24/7
+          </p>
         </div>
-      </footer>
+      </div>
     </div>
   );
 };
