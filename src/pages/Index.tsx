@@ -81,7 +81,7 @@ const Index = () => {
     queryKey: ["domain-breach", domain],
     queryFn: async () => {
       const response = await fetch(
-        `https://secyourscan.aryan4.com.np/v1/proxy-breaches-by-domain?domain=${domain}`
+        `https://secyourscan.aryan4.com.np/v1/domain-breaches-summary?domain=${domain}`
       );
 
       if (!response.ok) {
@@ -416,8 +416,8 @@ const Index = () => {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        {domainBreachData.breaches &&
-                        domainBreachData.breaches.length > 0 ? (
+                        {domainBreachData.sendDomains?.breaches_details
+                          ?.length > 0 ? (
                           <div className="space-y-4">
                             <div className="flex items-center gap-2 mb-4">
                               <XCircle className="h-5 w-5 text-red-400" />
@@ -425,12 +425,15 @@ const Index = () => {
                                 BREACHES DETECTED
                               </Badge>
                               <span className="text-slate-300">
-                                {domainBreachData.breaches.length} incident(s)
-                                found
+                                {
+                                  domainBreachData.sendDomains
+                                    .breaches_details[0].breach_count
+                                }{" "}
+                                incident(s) found
                               </span>
                             </div>
                             <div className="grid gap-3">
-                              {domainBreachData.breaches.map(
+                              {domainBreachData.sendDomains.breaches_details.map(
                                 (breach: any, index: number) => (
                                   <div
                                     key={index}
@@ -438,33 +441,24 @@ const Index = () => {
                                   >
                                     <div className="flex justify-between items-start mb-2">
                                       <h4 className="font-semibold text-white">
-                                        {breach.name || "Domain Breach"}
+                                        {breach.domain} Breach
                                       </h4>
-                                      <Badge
-                                        variant={getBadgeVariant(
-                                          breach.severity
-                                        )}
-                                      >
-                                        {breach.severity || "Medium"}
-                                      </Badge>
+                                      <Badge variant="destructive">High</Badge>
                                     </div>
                                     <p className="text-slate-400 text-sm mb-2">
-                                      {breach.description}
+                                      {breach.breach_emails} email(s)
+                                      compromised in {breach.breach_count}{" "}
+                                      breach(es).
                                     </p>
                                     <div className="flex items-center gap-4 text-sm">
                                       <span className="flex items-center gap-1 text-slate-300">
                                         <Calendar className="h-3 w-3" />
-                                        {breach.date
-                                          ? formatDate(breach.date)
-                                          : "Date unknown"}
+                                        {formatDate(breach.breach_last_seen)}
                                       </span>
-                                      {breach.affected_accounts && (
-                                        <span className="flex items-center gap-1 text-slate-300">
-                                          <Database className="h-3 w-3" />
-                                          {breach.affected_accounts} accounts
-                                          affected
-                                        </span>
-                                      )}
+                                      <span className="flex items-center gap-1 text-slate-300">
+                                        <Database className="h-3 w-3" />
+                                        {breach.breach_total} total breaches
+                                      </span>
                                     </div>
                                   </div>
                                 )
