@@ -77,7 +77,7 @@ const Index = () => {
     queryKey: ["domain-breach", domain],
     queryFn: async () => {
       const response = await fetch(
-        `https://secyourscan.aryan4.com.np/v1/proxy-breaches-by-domain/?domain=${domain}`
+        `https://secyourscan.aryan4.com.np/v1/proxy-breaches-by-domain?domain=${domain}`
       );
 
       if (!response.ok) {
