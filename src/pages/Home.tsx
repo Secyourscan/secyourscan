@@ -97,7 +97,7 @@ const Home = () => {
           <p className="text-xl text-slate-300 mb-8">
             Check if Your Email Address Has Been Compromised
           </p>
-          <Link to="/dashboard">
+          <Link to="/scan">
             <Button
               size="lg"
               className="bg-purple-600 hover:bg-purple-700 text-lg px-8 py-3"
